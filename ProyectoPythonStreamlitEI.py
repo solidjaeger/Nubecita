@@ -159,32 +159,47 @@ with tab2:
     # 2. Construcción del Modelo
     modelo_mlr = smf.ols('Y ~ X1 + X2 + X3 + X4', data=data_reg).fit()
     
-    st.subheader("Resumen del Modelo (Mínimos Cuadrados)")
-        # --- REEMPLAZA st.text(modelo_mlr.summary()) CON ESTO ---
+    # --- BLOQUE DE VISUALIZACIÓN UNIFICADO (REEMPLAZA LO ANTERIOR) ---
+    st.subheader("Análisis de Coeficientes y Bondad de Ajuste")
 
-    st.subheader("Análisis de Coeficientes del Modelo")
+    # 1. Cálculo de Intervalos de Confianza (Pregunta 5)
+    intervalos = modelo_mlr.conf_int(alpha=0.05)
+    intervalos.columns = ['Límite Inf. (2.5%)', 'Límite Sup. (97.5%)']
 
-    # 1. Creamos una tabla limpia con los coeficientes, errores y P-valores
-    df_coef = pd.DataFrame({
-        'Coeficiente (β)': modelo_mlr.params,
-        'Error Estándar': modelo_mlr.bse,
-        'Estadístico t': modelo_mlr.tvalues,
-        'P-valor': modelo_mlr.pvalues
-    })
+    # 2. Tabla Maestra de Coeficientes (Preguntas 5 y 6)
+    df_coef_completo = pd.concat([
+        pd.DataFrame({
+            'Coeficiente (β)': modelo_mlr.params,
+            'Error Estándar': modelo_mlr.bse,
+            'Estadístico t': modelo_mlr.tvalues,
+            'P-valor': modelo_mlr.pvalues
+        }),
+        intervalos
+    ], axis=1)
 
-    # 2. Mostramos la tabla formateada a 4 decimales
-    st.dataframe(df_coef.style.format("{:.4f}"))
+    st.dataframe(df_coef_completo.style.format("{:.4f}"), use_container_width=True)
 
-    # 3. Mostramos las métricas de bondad de ajuste en columnas resaltadas
-    col_m1, col_m2, col_m3 = st.columns(3)
+    # 3. Métricas de Bondad de Ajuste Global (Pregunta 3 y 4)
+    st.write("**Estadísticos Globales del Modelo:**")
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    
     with col_m1:
-        st.metric("R-squared (R²)", f"{modelo_mlr.rsquared:.4f}")
+        st.metric("R-squared ($R^2$)", f"{modelo_mlr.rsquared:.4f}")
     with col_m2:
-        st.metric("R² Ajustado", f"{modelo_mlr.rsquared_adj:.4f}")
+        st.metric("$R^2$ Ajustado", f"{modelo_mlr.rsquared_adj:.4f}")
     with col_m3:
         st.metric("Estadístico F", f"{modelo_mlr.fvalue:.2f}")
+    with col_m4:
+        st.metric("P-valor (F)", f"{modelo_mlr.f_pvalue:.2e}")
 
+    # 4. Mensaje de Validación Global
+    if modelo_mlr.f_pvalue < 0.05:
+        st.success(f"✅ El modelo es globalmente significativo ($P < 0.05$).")
+    else:
+        st.error("❌ El modelo no es significativo globalmente.")
+    
     st.markdown("---")
+    # --- FIN DEL BLOQUE UNIFICADO ---
     # -------------------------------------------------------
     
     # 3. Interpretación de R2 y Optimización
