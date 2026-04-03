@@ -100,11 +100,6 @@ with tab1:
     else:
         st.warning(f"**Resultado:** El P-valor es {p_valor_anova:.4f} > 0.05. No se rechaza Ho.")
 
-    if p_valor_anova < 0.05:
-        st.success(f"**Resultado:** El P-valor es {p_valor_anova:.4f} < 0.05. Se rechaza Ho. Hay diferencia significativa.")
-    else:
-        st.warning(f"**Resultado:** El P-valor es {p_valor_anova:.4f} > 0.05. No se rechaza Ho.")
-
     # 4. Validación de Supuestos
     st.subheader("Matriz Diagnóstica (Supuestos)")
     residuales = modelo_anova.resid
