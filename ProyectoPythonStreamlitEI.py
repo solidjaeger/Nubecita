@@ -26,12 +26,38 @@ with tab1:
     st.header("Análisis de Varianza: SwiftVen vs SwiftFast vs SwiftPay")
     
     # 1. Carga de Datos
-    data_anova = pd.DataFrame({
-        'Arquitectura': ['SwiftVen']*4 + ['SwiftFast']*4 + ['SwiftPay']*4,
-        'Latencia': [3.30, 3.42, 3.36, 3.34, 
-                     3.25, 3.15, 3.30, 3.20, 
-                     3.10, 3.25, 3.18, 3.12]
-    })
+
+    st.header("Configuración de Datos: Parte I")
+
+    # 1. Definimos los datos en el formato del PDF (Ancho)
+    datos_pdf = {
+        'Arquitectura': ['SwiftVen', 'SwiftFast', 'SwiftPay'],
+        'Muestra 1': [3.30, 3.25, 3.10],
+        'Muestra 2': [3.42, 3.15, 3.25],
+        'Muestra 3': [3.36, 3.30, 3.18],
+        'Muestra 4': [3.34, 3.20, 3.12]
+    }
+
+    df_pdf = pd.DataFrame(datos_pdf)
+
+    st.subheader("Panel de Control (Formato PDF)")
+    # 2. Editor dinámico con columnas por muestra
+    df_editado = st.data_editor(
+        df_pdf, 
+        num_rows="dynamic", 
+        use_container_width=True
+    )
+
+    # 3. TRANSFORMACIÓN CRÍTICA: Convertimos a formato largo para el ANOVA
+    # Esto hace que las columnas 'Muestra X' vuelvan a ser filas
+    data_anova = df_editado.melt(
+        id_vars=['Arquitectura'], 
+        value_vars=['Muestra 1', 'Muestra 2', 'Muestra 3', 'Muestra 4'],
+        var_name='Muestra', 
+        value_name='Latencia'
+    )
+
+    # A partir de aquí, usas 'data_anova' para tus cálculos de siempre
     
     # 2. Estadística Descriptiva y Boxplot
     col1, col2 = st.columns(2)
